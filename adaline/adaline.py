@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import math
 
 
@@ -65,14 +64,3 @@ class Adaline:
                 total_hits += 1
 
         return total_hits/y_test.size
-
-df = pd.read_csv('../datasets/or.csv')
-X = df.drop('y', axis = 1)
-y = df['y']
-
-model = Adaline()
-
-model.fit(X, y)
-
-print('Score:', model.score(X, y))
-print('Wight:', model.get_weight())
