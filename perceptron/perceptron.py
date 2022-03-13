@@ -1,17 +1,17 @@
 import numpy as np
-import pandas as pd
 import math
 
+import pandas as pd
 
-class Adaline:
-    def __init__(self, bies = -1, eta = 0.001, epoch = 100, W = [], activation_function = ''):
+class Perceptron:
+    def __init__(self, bies = -1, eta = 0.2, epoch = 100, W = [], activation_function = 'hardlim'):
         self.__bies = bies
         self.__eta = eta
         self.__epoch = epoch
         self.__W = W
         self.__activation_function = activation_function
     
-    
+
     def get_weight(self):
         return self.__W
 
@@ -30,15 +30,19 @@ class Adaline:
                 x = np.hstack((self.__bies, x)) # concatenando o bies
 
                 # produto interno entre as amostras x com bies e os pesos W
-                pred = np.dot(x, self.__W)
+                u = np.dot(x, self.__W)
+                
+                # função de ativação
+                pred = self.activation_function(u)
 
-                # armazeno o quanto o modelo errou para em seguida ajustá-lo
-                e = yn - pred
-                self.__W += self.__eta * (e * x)
+                # se errou, aplica-se a regra de aprendizado
+                if pred != yn:
+                    e = yn - pred
+                    self.__W += self.__eta * (e * x)
 
-
+                
     def activation_function(self, u):
-        if self.__activation_function == '':
+        if self.__activation_function == 'hardlim':
             return 0 if u < 0 else 1
         if self.__activation_function == 'relu':
             return 0 if u <= 0 else 1
@@ -49,12 +53,13 @@ class Adaline:
 
 
     def predict(self, x):
-        # produto interno entre as amostras x com bies e os pesos W
+        # produto interno das amostras x com bies e os pesos W
         x = np.hstack((self.__bies, x))
-        pred = np.dot(x, self.__W)
+
+        u = np.dot(x, self.__W)
 
         # função de ativação
-        return self.activation_function(pred)
+        return self.activation_function(u)
 
 
     def score(self, X_test, y_test):
@@ -66,13 +71,12 @@ class Adaline:
 
         return total_hits/y_test.size
 
-df = pd.read_csv('../datasets/or.csv')
+df = pd.read_csv('../datasets/xor.csv')
 X = df.drop('y', axis = 1)
 y = df['y']
 
-model = Adaline()
+model = Perceptron()
 
 model.fit(X, y)
 
 print('Score:', model.score(X, y))
-print('Wight:', model.get_weight())
