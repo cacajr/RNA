@@ -1,7 +1,6 @@
 import numpy as np
 import math
 
-import pandas as pd
 
 class Perceptron:
     def __init__(self, bies = -1, eta = 0.2, epoch = 100, W = [], activation_function = 'hardlim'):
@@ -55,7 +54,6 @@ class Perceptron:
     def predict(self, x):
         # produto interno das amostras x com bies e os pesos W
         x = np.hstack((self.__bies, x))
-
         u = np.dot(x, self.__W)
 
         # função de ativação
@@ -70,13 +68,3 @@ class Perceptron:
                 total_hits += 1
 
         return total_hits/y_test.size
-
-df = pd.read_csv('../datasets/xor.csv')
-X = df.drop('y', axis = 1)
-y = df['y']
-
-model = Perceptron()
-
-model.fit(X, y)
-
-print('Score:', model.score(X, y))
