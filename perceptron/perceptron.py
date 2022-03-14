@@ -11,6 +11,10 @@ class Perceptron:
         self.__activation_function = activation_function
     
 
+    def get_bies(self):
+        return self.__bies
+
+
     def get_weight(self):
         return self.__W
 
