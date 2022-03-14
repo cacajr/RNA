@@ -3,7 +3,7 @@ import math
 
 
 class Perceptron:
-    def __init__(self, bies = -1, eta = 0.2, epoch = 100, W = [], activation_function = 'hardlim'):
+    def __init__(self, bies = -1, eta = 0.001, epoch = 100, W = [], activation_function = 'hardlim'):
         self.__bies = bies
         self.__eta = eta
         self.__epoch = epoch
