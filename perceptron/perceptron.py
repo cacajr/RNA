@@ -20,7 +20,7 @@ class Perceptron:
         if self.__W == []:
             # array de pesos aleatórios das entradas com o peso do bies no índice 0
             self.__W = np.random.uniform(-1, 1, X.shape[1] + 1)
-        elif len(self.__W) != X.shape[1]:
+        elif len(self.__W) != X.shape[1] + 1:
             print('Array de pesos incompatível com entrada!')
             return None
 
