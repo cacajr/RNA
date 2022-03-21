@@ -24,16 +24,18 @@ class MCP:
         for perceptron, y_separate in zip(self.__perceptrons, list_y_separate):
             perceptron.fit(X, y_separate)
 
+            # print(perceptron.score(X, y_separate))
+
 
     def __y_separate(self, y):
         self.__ndarray_classes = y.unique() # array com as classes existentes
         list_y_separate = []
         for each_class in self.__ndarray_classes:
-            ndarray_index_class_zeros = np.where(self.__ndarray_classes != each_class)[0] # classe que receberá 1
+            ndarray_index_class_zeros = np.where(self.__ndarray_classes != each_class)[0] # index das classes que receberão 0
             list_class_zeros = [self.__ndarray_classes[i] for i in ndarray_index_class_zeros] # classes que receberão 0
 
             new_y = y.replace(each_class, 1)
-            new_y = new_y.replace(list_class_zeros, 0)
+            new_y = new_y.replace(list_class_zeros, [0 for _ in range(len(list_class_zeros))])
             list_y_separate.append(new_y) # adicionando o novo y para classificar a classe "each_classe"
         
         return list_y_separate
@@ -42,18 +44,12 @@ class MCP:
     def predict(self, x):
         predicts = []
         for perceptron in self.__perceptrons:
-            predicts.append(perceptron.predict(x))
+            predicts.append(perceptron.predict(x, False)) # retiro a função de ativação do predict
 
-        index_predict = np.where((self.__ndarray_classes * predicts) != '')[0]
+        predict_activation = [1 if max(predicts) == predict else 0 for predict in predicts]
+        predict_index = np.where((self.__ndarray_classes * predict_activation) != '')[0][0]
 
-        # caso todas as predições sejam 0 ou todas as predições sejam 1, 
-        # então a primeira classe será escolhida (poderia randomizar)
-        if len(index_predict) == 0 or len(index_predict) != 1:
-            index_predict = 0
-        else:
-            index_predict = index_predict[0]
-
-        return self.__ndarray_classes[index_predict]
+        return self.__ndarray_classes[predict_index]
 
 
     def score(self, X_test, y_test):

@@ -55,13 +55,13 @@ class Perceptron:
             return (math.exp(2 * u) - 1) / (math.exp(2 * u) + 1)
 
 
-    def predict(self, x):
+    def predict(self, x, activation_function = True):
         # produto interno das amostras x com bies e os pesos W
         x = np.hstack((self.__bies, x))
         u = np.dot(x, self.__W)
 
         # função de ativação
-        return self.activation_function(u)
+        return self.activation_function(u) if activation_function else u
 
 
     def score(self, X_test, y_test):
