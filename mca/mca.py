@@ -44,7 +44,7 @@ class MCA:
     def predict(self, x):
         predicts = []
         for adaline in self.__adalines:
-            predicts.append(adaline.predict(x))
+            predicts.append(adaline.predict(x, False)) # retiro a função de ativação do predict
 
         predict_activation = [1 if max(predicts) == predict else 0 for predict in predicts]
         predict_index = np.where((self.__ndarray_classes * predict_activation) != '')[0][0]

@@ -42,8 +42,6 @@ class Adaline:
 
 
     def activation_function(self, u):
-        if self.__activation_function == '':
-            return u
         if self.__activation_function == 'hardlim':
             return 0 if u < 0 else 1
         if self.__activation_function == 'relu':
@@ -54,13 +52,13 @@ class Adaline:
             return (math.exp(2 * u) - 1) / (math.exp(2 * u) + 1)
 
 
-    def predict(self, x):
+    def predict(self, x, activation_function = True):
         # produto interno entre as amostras x com bies e os pesos W
         x = np.hstack((self.__bies, x))
         pred = np.dot(x, self.__W)
 
         # função de ativação
-        return self.activation_function(pred)
+        return self.activation_function(pred) if activation_function else pred
 
 
     def score(self, X_test, y_test):
