@@ -24,16 +24,18 @@ class MCA:
         for adaline, y_separate in zip(self.__adalines, list_y_separate):
             adaline.fit(X, y_separate)
 
+            # print(adaline.score(X, y_separate))
+
 
     def __y_separate(self, y):
         self.__ndarray_classes = y.unique() # array com as classes existentes
         list_y_separate = []
         for each_class in self.__ndarray_classes:
-            ndarray_index_class_zeros = np.where(self.__ndarray_classes != each_class)[0] # classe que receberá 1
+            ndarray_index_class_zeros = np.where(self.__ndarray_classes != each_class)[0] # index das classes que receberão 0
             list_class_zeros = [self.__ndarray_classes[i] for i in ndarray_index_class_zeros] # classes que receberão 0
 
             new_y = y.replace(each_class, 1)
-            new_y = new_y.replace(list_class_zeros, 0)
+            new_y = new_y.replace(list_class_zeros, [0 for _ in range(len(list_class_zeros))])
             list_y_separate.append(new_y) # adicionando o novo y para classificar a classe "each_classe"
         
         return list_y_separate
@@ -41,24 +43,13 @@ class MCA:
 
     def predict(self, x):
         predicts = []
-        for perceptron in self.__adalines:
-            predicts.append(perceptron.predict(x))
+        for adaline in self.__adalines:
+            predicts.append(adaline.predict(x))
 
+        predict_activation = [1 if max(predicts) == predict else 0 for predict in predicts]
+        predict_index = np.where((self.__ndarray_classes * predict_activation) != '')[0][0]
 
-        # essa parte depende do tipo de problema, caso seja de classificação, 
-        # então multiplica-se a lista predict com o ndarray de classes, caso
-        # seja de regressão, então deve-se fazer uma margem, exemplo: predict <
-        # 1.5 -> x, predict >= 1.5 -> y, ...
-        index_predict = np.where((self.__ndarray_classes * predicts) != '')[0]
-
-        # caso todas as predições sejam 0 ou todas as predições sejam 1, 
-        # então a primeira classe será escolhida (poderia randomizar)
-        if len(index_predict) == 0 or len(index_predict) != 1:
-            index_predict = 0
-        else:
-            index_predict = index_predict[0]
-
-        return self.__ndarray_classes[index_predict]
+        return self.__ndarray_classes[predict_index]
 
 
     def score(self, X_test, y_test):
