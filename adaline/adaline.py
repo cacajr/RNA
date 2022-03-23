@@ -38,6 +38,7 @@ class Adaline:
                 # armazeno o quanto o modelo errou para em seguida ajustá-lo
                 e = yn - pred
                 self.__W += self.__eta * (e * x)
+                # self.__W = np.add(self.__W, self.__eta * (e * x), out=self.__W, casting='unsafe')
                 # np.seterr(all='ignore', over='raise') # solução para o estouro, aumenta o formato e ignora o warn
 
 

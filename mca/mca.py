@@ -18,7 +18,7 @@ class MCA:
 
     def fit(self, X, y):
         # divisão das classes para treinar cada uma individualmente
-        list_y_separate = self.__y_separate(y)
+        list_y_separate = y
 
         # treinando cada classe com um adaline distinto
         for adaline, y_separate in zip(self.__adalines, list_y_separate):
@@ -27,18 +27,18 @@ class MCA:
             # print(adaline.score(X, y_separate))
 
 
-    def __y_separate(self, y):
-        self.__ndarray_classes = y.unique() # array com as classes existentes
-        list_y_separate = []
-        for each_class in self.__ndarray_classes:
-            ndarray_index_class_zeros = np.where(self.__ndarray_classes != each_class)[0] # index das classes que receberão 0
-            list_class_zeros = [self.__ndarray_classes[i] for i in ndarray_index_class_zeros] # classes que receberão 0
+    # def __y_separate(self, y):
+    #     self.__ndarray_classes = y.unique() # array com as classes existentes
+    #     list_y_separate = []
+    #     for each_class in self.__ndarray_classes:
+    #         ndarray_index_class_zeros = np.where(self.__ndarray_classes != each_class)[0] # index das classes que receberão 0
+    #         list_class_zeros = [self.__ndarray_classes[i] for i in ndarray_index_class_zeros] # classes que receberão 0
 
-            new_y = y.replace(each_class, 1)
-            new_y = new_y.replace(list_class_zeros, [0 for _ in range(len(list_class_zeros))])
-            list_y_separate.append(new_y) # adicionando o novo y para classificar a classe "each_classe"
+    #         new_y = y.replace(each_class, 1)
+    #         new_y = new_y.replace(list_class_zeros, [0 for _ in range(len(list_class_zeros))])
+    #         list_y_separate.append(new_y) # adicionando o novo y para classificar a classe "each_classe"
         
-        return list_y_separate
+    #     return list_y_separate
 
 
     def predict(self, x):
