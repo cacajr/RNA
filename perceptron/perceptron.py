@@ -19,7 +19,11 @@ class Perceptron:
         return self.__W
 
 
-    def fit(self, X, y):
+    def set_weight(self, W):
+        self.__W = W
+
+
+    def fit(self, X, y, learn_rule = True):
         # averiguando se veio pesos definidos no parâmetro
         if self.__W == []:
             # array de pesos aleatórios das entradas com o peso do bies no índice 0
@@ -39,7 +43,7 @@ class Perceptron:
                 pred = self.activation_function(u)
 
                 # se errou, aplica-se a regra de aprendizado
-                if pred != yn:
+                if pred != yn and learn_rule:
                     e = yn - pred
                     self.__W += self.__eta * (e * x)
 
@@ -51,6 +55,8 @@ class Perceptron:
             return 0 if u <= 0 else 1
         if self.__activation_function == 'sign':
             return -1 if u <= 0 else 1
+        if self.__activation_function == 'sigmoid':
+            return 1/(1 + np.exp(-u))
         if self.__activation_function == 'tanh':
             return (math.exp(2 * u) - 1) / (math.exp(2 * u) + 1)
 
