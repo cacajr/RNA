@@ -29,6 +29,7 @@ class MLP:
         for _ in range(self.epoch):
             for x, yn in zip(X.values, y.values):
                 inputs = pd.DataFrame([x], columns = X.columns)
+                inputs_each_layer = [inputs] # guarda a entrada de cada camada
                 y_inputs = pd.Series(yn)
                 for layer in self.__perceptrons:
                     predicts = []
@@ -36,12 +37,10 @@ class MLP:
                         perceptron.fit(inputs, y_inputs, False) # treino sem aplicar a regra de aprendizado
                         predicts.append(perceptron.predict(x))
                     inputs = pd.DataFrame([predicts], columns = X.columns)
+                    inputs_each_layer.append(inputs)
 
                 # MLP Out
-                predicts = []
-                for perceptron in self.__perceptrons[-1]:
-                    predicts.append(perceptron.predict(x))
-                inputs = pd.DataFrame([predicts], columns = X.columns)
+                inputs = inputs_each_layer[-1] # saida da ultima camada
                 self.__out.fit(inputs, y_inputs, False)
                 err = yn - self.__out.predict(x)
 
@@ -49,21 +48,23 @@ class MLP:
                 u = self.__out.predict(x, False)
                 delta = self.eta * err * self.__der_sigmoid(u)
                 new_W = self.__out.get_weight()
-                new_W[1:] += delta * x
+
+                new_W[1:] += delta * inputs.values[0]
                 new_W[0] -= delta
                 self.__out.set_weight(new_W)
 
                 # Backpropagation
-                for layer in self.__perceptrons:
+                for layer, inputs in zip(self.__perceptrons[::-1], inputs_each_layer[:-1][::-1]):
                     for perceptron in layer:
                         u = perceptron.predict(x, False)
-                        yn = perceptron.predict(x)
                         sum_err = 0
                         for wn in perceptron.get_weight():
-                            sum_err += err * self.__der_sigmoid(yn) * wn
+                            sum_err += err * self.__der_sigmoid(u) * wn
+                        # err = sum_err # devo usar isso? acumulando os erros para as proximas camadas?
                         delta = self.eta * sum_err * self.__der_sigmoid(u)
                         new_W = perceptron.get_weight()
-                        new_W[1:] += delta * x
+
+                        new_W[1:] += delta * inputs.values[0]
                         new_W[0] -= delta
                         perceptron.set_weight(new_W)
                 
@@ -77,13 +78,20 @@ class MLP:
 
     
     def predict(self, x):
-        return self.__out.predict(x)
+        inputs = x
+        for layer in self.__perceptrons:
+            predicts = []
+            for perceptron in layer:
+                predicts.append(perceptron.predict(inputs))
+            inputs = predicts
+
+        return self.__out.predict(inputs)
 
 
     def score(self, X_test, y_test):
         total_hits = 0
         for x, y in zip(X_test.values, y_test.values):
-            predict = self.predict(x)
+            predict = 0 if self.predict(x) < 0 else 1 # aplicando hardlim
             if predict == y:
                 total_hits += 1
 
