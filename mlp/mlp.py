@@ -42,28 +42,32 @@ class MLP:
                 # MLP Out
                 inputs = inputs_each_layer[-1] # saida da ultima camada
                 self.__out.fit(inputs, y_inputs, False)
-                err = yn - self.__out.predict(x)
+                u = self.__out.predict(x, False)
+                pred = self.__out.predict(x)
+                err = yn - pred
 
                 # Learn Rule (Miscalculation)
-                u = self.__out.predict(x, False)
                 delta = self.eta * err * self.__der_sigmoid(u)
+                
                 new_W = self.__out.get_weight()
-
                 new_W[1:] += delta * inputs.values[0]
                 new_W[0] -= delta
                 self.__out.set_weight(new_W)
 
+                u = self.__out.predict(x, False)
+                pred = self.__out.predict(x)
+                err = yn - pred
+
                 # Backpropagation
                 for layer, inputs in zip(self.__perceptrons[::-1], inputs_each_layer[:-1][::-1]):
                     for perceptron in layer:
-                        u = perceptron.predict(x, False)
                         sum_err = 0
                         for wn in perceptron.get_weight():
                             sum_err += err * self.__der_sigmoid(u) * wn
-                        # err = sum_err # devo usar isso? acumulando os erros para as proximas camadas?
-                        delta = self.eta * sum_err * self.__der_sigmoid(u)
-                        new_W = perceptron.get_weight()
+                        u_ = perceptron.predict(x, False)
+                        delta = self.eta * sum_err * self.__der_sigmoid(u_)
 
+                        new_W = perceptron.get_weight()
                         new_W[1:] += delta * inputs.values[0]
                         new_W[0] -= delta
                         perceptron.set_weight(new_W)
