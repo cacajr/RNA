@@ -48,7 +48,7 @@ class MLP:
 
                 # Learn Rule (Miscalculation)
                 delta = self.eta * err * self.__der_sigmoid(u)
-                
+
                 new_W = self.__out.get_weight()
                 new_W[1:] += delta * inputs.values[0]
                 new_W[0] -= delta
@@ -64,7 +64,7 @@ class MLP:
                         sum_err = 0
                         for wn in perceptron.get_weight():
                             sum_err += err * self.__der_sigmoid(u) * wn
-                        u_ = perceptron.predict(x, False)
+                        u_ = perceptron.predict(inputs.values[0], False)
                         delta = self.eta * sum_err * self.__der_sigmoid(u_)
 
                         new_W = perceptron.get_weight()
