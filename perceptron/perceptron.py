@@ -9,6 +9,7 @@ class Perceptron:
         self.__epoch = epoch
         self.__W = W
         self.__activation_function = activation_function
+        self.__err = 0 # usado apenas no MLP
     
 
     def get_bies(self):
@@ -21,6 +22,14 @@ class Perceptron:
 
     def set_weight(self, W):
         self.__W = W
+
+
+    def get_error(self):
+        return self.__err
+
+
+    def set_error(self, err):
+        self.__err = err
 
 
     def fit(self, X, y, learn_rule = True):
@@ -46,6 +55,25 @@ class Perceptron:
                 if pred != yn and learn_rule:
                     e = yn - pred
                     self.__W += self.__eta * (e * x)
+
+    def fit(self, x, yn, activation_function = True): # fit usado para o MLP
+        # averiguando se veio pesos definidos no parâmetro
+        if self.__W == []:
+            # array de pesos aleatórios das entradas com o peso do bies no índice 0
+            self.__W = np.random.uniform(-1, 1, len(x) + 1)
+
+        x = np.hstack((self.__bies, x)) # concatenando o bies
+
+        # produto interno entre as amostras x com bies e os pesos W
+        u = np.dot(x, self.__W)
+        
+        # função de ativação
+        pred = self.activation_function(u) if activation_function else u
+
+        # guardando o erro
+        self.__err = yn - pred
+
+        return pred
 
                 
     def activation_function(self, u):

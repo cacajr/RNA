@@ -4,15 +4,15 @@ import pandas as pd
 
 
 class MLP:
-    def __init__(self, config_layers = [2, 2], bies = -1, eta = 0.001, epoch = 100, W = [], activation_function = 'sigmoid'):
+    def __init__(self, config_layers = [2, 2], bies = -1, eta = 0.001, epoch = 100, W = [], activation_function_hidden_layer = 'sigmoid', activation_function_out = 'hardlim'):
         self.__perceptrons = [
             [
-                Perceptron(bies, eta, 1, W, activation_function) 
+                Perceptron(bies, eta, 1, W, activation_function_hidden_layer) 
                 for _ in range(num_perceptrons)
             ]
             for num_perceptrons in config_layers
         ]
-        self.__out = Perceptron(bies, eta, 1, W, activation_function)
+        self.__out = Perceptron(bies, eta, 1, W, activation_function_out)
         self.eta = eta
         self.epoch = epoch
 
@@ -27,49 +27,62 @@ class MLP:
 
     def fit(self, X, y):
         for _ in range(self.epoch):
+            # shuffle
+            # Xy = pd.concat([X, y], axis = 1)
+            # Xy_shuffle = Xy.sample(frac=1)
+
+            # X = Xy_shuffle.drop(Xy_shuffle.columns[-1], axis=1)
+            # y = Xy_shuffle[Xy_shuffle.columns[-1]]
+
             for x, yn in zip(X.values, y.values):
-                inputs = pd.DataFrame([x], columns = X.columns)
-                inputs_each_layer = [inputs] # guarda a entrada de cada camada
-                y_inputs = pd.Series(yn)
+                inputs = x
+                inputs_each_layer = [inputs] # guarda a entrada de cada camada oculta
                 for layer in self.__perceptrons:
                     predicts = []
                     for perceptron in layer:
-                        perceptron.fit(inputs, y_inputs, False) # treino sem aplicar a regra de aprendizado
-                        predicts.append(perceptron.predict(x))
-                    inputs = pd.DataFrame([predicts], columns = X.columns)
-                    inputs_each_layer.append(inputs)
+                        pred = perceptron.fit(inputs, yn) # treino perceptron MLP
+                        predicts.append(pred)
+                    inputs = predicts
+                    inputs_each_layer.append(np.array(inputs))
 
                 # MLP Out
-                inputs = inputs_each_layer[-1] # saida da ultima camada
-                self.__out.fit(inputs, y_inputs, False)
-                u = self.__out.predict(x, False)
-                pred = self.__out.predict(x)
-                err = yn - pred
-
+                inputs = inputs_each_layer[-1] # saida da ultima camada oculta
+                u = self.__out.fit(inputs, yn, False)
+                
                 # Learn Rule (Miscalculation)
-                delta = self.eta * err * self.__der_sigmoid(u)
+                delta_out = self.__out.get_error() * self.__der_sigmoid(u)
 
                 new_W = self.__out.get_weight()
-                new_W[1:] += delta * inputs.values[0]
-                new_W[0] -= delta
+                w = new_W[1:] + self.eta * inputs * delta_out
+                b = [new_W[0] + self.eta * self.__out.get_bies() * delta_out]
+                new_W = np.concatenate([b, w])
+
                 self.__out.set_weight(new_W)
 
-                u = self.__out.predict(x, False)
-                pred = self.__out.predict(x)
-                err = yn - pred
-
+                # ref: https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
                 # Backpropagation
+                delta_aux = delta_out
                 for layer, inputs in zip(self.__perceptrons[::-1], inputs_each_layer[:-1][::-1]):
+                    # somatório dos erros nessa camada
+                    sum_error = 0.0
                     for perceptron in layer:
-                        sum_err = 0
-                        for wn in perceptron.get_weight():
-                            sum_err += err * self.__der_sigmoid(u) * wn
-                        u_ = perceptron.predict(inputs.values[0], False)
-                        delta = self.eta * sum_err * self.__der_sigmoid(u_)
+                        sum_error += perceptron.get_weight() * delta_aux
+                    sum_error = sum(sum_error)
+
+                    # será que é assim que se propaga o delta para as demais camadas?
+                    delta_aux = sum_error
+
+                    # atualizando os erros e os pesos dessa camada
+                    for perceptron in layer:
+                        u_ = perceptron.predict(inputs, False)
+                        delta = self.__der_sigmoid(u_) * sum_error
+                        perceptron.set_error(delta)
 
                         new_W = perceptron.get_weight()
-                        new_W[1:] += delta * inputs.values[0]
-                        new_W[0] -= delta
+                        w = new_W[1:] + self.eta * inputs * delta
+                        b = [new_W[0] + self.eta * perceptron.get_bies() * delta]
+                        new_W = np.concatenate([b, w])
+
                         perceptron.set_weight(new_W)
                 
     
@@ -95,7 +108,7 @@ class MLP:
     def score(self, X_test, y_test):
         total_hits = 0
         for x, y in zip(X_test.values, y_test.values):
-            predict = 0 if self.predict(x) < 0 else 1 # aplicando hardlim
+            predict = self.predict(x)
             if predict == y:
                 total_hits += 1
 
