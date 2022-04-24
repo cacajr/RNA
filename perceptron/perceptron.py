@@ -71,7 +71,7 @@ class Perceptron:
         pred = self.activation_function(u) if activation_function else u
 
         # guardando o erro
-        self.__err = yn - pred
+        self.__err = yn - self.activation_function(u)
 
         return pred
 

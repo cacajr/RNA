@@ -28,11 +28,11 @@ class MLP:
     def fit(self, X, y):
         for _ in range(self.epoch):
             # shuffle
-            # Xy = pd.concat([X, y], axis = 1)
-            # Xy_shuffle = Xy.sample(frac=1)
+            Xy = pd.concat([X, y], axis = 1)
+            Xy_shuffle = Xy.sample(frac=1)
 
-            # X = Xy_shuffle.drop(Xy_shuffle.columns[-1], axis=1)
-            # y = Xy_shuffle[Xy_shuffle.columns[-1]]
+            X = Xy_shuffle.drop(Xy_shuffle.columns[-1], axis=1)
+            y = Xy_shuffle[Xy_shuffle.columns[-1]]
 
             for x, yn in zip(X.values, y.values):
                 inputs = x
@@ -61,25 +61,19 @@ class MLP:
 
                 # ref: https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
                 # Backpropagation
-                delta_aux = delta_out
                 for layer, inputs in zip(self.__perceptrons[::-1], inputs_each_layer[:-1][::-1]):
                     # somatório dos erros nessa camada
                     sum_error = 0.0
                     for perceptron in layer:
-                        sum_error += perceptron.get_weight() * delta_aux
+                        u_ = perceptron.predict(inputs, False)
+                        delta = perceptron.get_error() * self.__der_sigmoid(u_)
+                        sum_error += perceptron.get_weight() * delta
                     sum_error = sum(sum_error)
-
-                    # será que é assim que se propaga o delta para as demais camadas? Não está faltando
-                    # o produto com a derivada da ativação do perceptron em questão? Mas se tiver faltando
-                    # essa derivada, qual dos deltas irei levar para a próxima camada se tem vários deltas
-                    # em uma mesma camada?
-                    delta_aux = sum_error
 
                     # atualizando os erros e os pesos dessa camada
                     for perceptron in layer:
                         u_ = perceptron.predict(inputs, False)
                         delta = self.__der_sigmoid(u_) * sum_error
-                        perceptron.set_error(delta)
 
                         new_W = perceptron.get_weight()
                         w = new_W[1:] + self.eta * inputs * delta
