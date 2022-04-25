@@ -59,21 +59,19 @@ class MLP:
 
                 self.__out.set_weight(new_W)
 
-                # ref: https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
+                # ref1: ajalmar
+                # ref2: https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
                 # Backpropagation
+                err_prop = sum(self.__out.get_weight() * delta_out)
                 for layer, inputs in zip(self.__perceptrons[::-1], inputs_each_layer[:-1][::-1]):
-                    # somatório dos erros nessa camada
-                    sum_error = 0.0
-                    for perceptron in layer:
-                        u_ = perceptron.predict(inputs, False)
-                        delta = perceptron.get_error() * self.__der_sigmoid(u_)
-                        sum_error += perceptron.get_weight() * delta
-                    sum_error = sum(sum_error)
+
+                    # guardará o erro propagado para próxima camada
+                    sum_err_prop = 0.0
 
                     # atualizando os erros e os pesos dessa camada
                     for perceptron in layer:
                         u_ = perceptron.predict(inputs, False)
-                        delta = self.__der_sigmoid(u_) * sum_error
+                        delta = self.__der_sigmoid(u_) * err_prop
 
                         new_W = perceptron.get_weight()
                         w = new_W[1:] + self.eta * inputs * delta
@@ -81,6 +79,11 @@ class MLP:
                         new_W = np.concatenate([b, w])
 
                         perceptron.set_weight(new_W)
+
+                        sum_err_prop += sum(perceptron.get_weight() * delta)
+
+                    # atualizando o erro propagado
+                    err_prop = sum_err_prop
                 
     
     def __sigmoid(self, u):
