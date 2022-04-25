@@ -4,7 +4,7 @@ import pandas as pd
 
 
 class MLP:
-    def __init__(self, config_layers = [2, 2], bies = 1, eta = 0.00001, epoch = 100, W = [], activation_function_hidden_layer = 'sigmoid', activation_function_out = 'hardlim'):
+    def __init__(self, config_layers = [2, 2], bies = 1, eta = 0.0001, epoch = 100, W = [], activation_function_hidden_layer = 'sigmoid', activation_function_out = 'hardlim'):
         self.__perceptrons = [
             [
                 Perceptron(bies, eta, 1, W, activation_function_hidden_layer) 
