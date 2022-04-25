@@ -51,6 +51,7 @@ class MLP:
                 
                 # Learn Rule (Miscalculation)
                 delta_out = self.__out.get_error() * self.__der_sigmoid(u)
+                old_out_weight = self.__out.get_weight()
 
                 new_W = self.__out.get_weight()
                 w = new_W[1:] + self.eta * inputs * delta_out
@@ -62,7 +63,7 @@ class MLP:
                 # ref1: ajalmar
                 # ref2: https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
                 # Backpropagation
-                err_prop = sum(self.__out.get_weight() * delta_out)
+                err_prop = sum(old_out_weight * delta_out) # utilizando o peso da saida antes de ser atualizado
                 for layer, inputs in zip(self.__perceptrons[::-1], inputs_each_layer[:-1][::-1]):
 
                     # guardará o erro propagado para próxima camada
@@ -72,6 +73,7 @@ class MLP:
                     for perceptron in layer:
                         u_ = perceptron.predict(inputs, False)
                         delta = self.__der_sigmoid(u_) * err_prop
+                        old_perceptron_weight = self.__out.get_weight()
 
                         new_W = perceptron.get_weight()
                         w = new_W[1:] + self.eta * inputs * delta
@@ -80,7 +82,7 @@ class MLP:
 
                         perceptron.set_weight(new_W)
 
-                        sum_err_prop += sum(perceptron.get_weight() * delta)
+                        sum_err_prop += sum(old_perceptron_weight * delta)
 
                     # atualizando o erro propagado
                     err_prop = sum_err_prop
