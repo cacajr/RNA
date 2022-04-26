@@ -66,6 +66,6 @@ def load_two_moon():
 
 
 def load_ripley():
-    data = pd.read_csv('local_datasets/rip.csv', sep=',', header=None)
+    data = pd.read_csv('datasets/rip.csv', sep=',', header=None)
     return __encode_and_transform(data)
 
