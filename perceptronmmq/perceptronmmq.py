@@ -24,9 +24,8 @@ class PerceptronMMQ:
 
 
     def fit(self, X, y):
-        # adicionando bies a matriz X
-        bies_column = pd.DataFrame().insert(0, 'bies', self.__bies)
-        X = pd.concat([bies_column, X])
+        # adicionando bies a matriz X (ultima coluna)
+        X = X.assign(bies=self.__bies)
 
         # aplicando Pseudo-Inversa de Moore-Penrose
         self.__W = linalg.pinv(X) @ y
@@ -46,10 +45,10 @@ class PerceptronMMQ:
 
 
     def predict(self, x, activation_function = True):
-        
-        u = (self.__W[1:] * x) + self.__bies
+        # adiciona bies no final da amostra
+        x = np.hstack((x, self.__bies))
+        u = np.dot(x, self.__W)
 
-        # função de ativação
         return self.activation_function(u) if activation_function else u
 
 
