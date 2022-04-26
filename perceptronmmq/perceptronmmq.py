@@ -1,13 +1,13 @@
 import numpy as np
 import math
 from scipy import linalg
+import pandas as pd
 
 
 class PerceptronMMQ:
-    def __init__(self, bies = -1, eta = 0.001, W = [], activation_function = 'hardlim'):
+    def __init__(self, bies = -1, activation_function = 'hardlim'):
         self.__bies = bies
-        self.__eta = eta
-        self.__W = W
+        self.__W = []
         self.__activation_function = activation_function
     
 
@@ -24,15 +24,12 @@ class PerceptronMMQ:
 
 
     def fit(self, X, y):
-        # averiguando se veio pesos definidos no parâmetro
-        if self.__W == []:
-            # array de pesos aleatórios das entradas com o peso do bies no índice 0
-            self.__W = np.random.uniform(-1, 1, X.shape[1] + 1)
-        elif len(self.__W) != X.shape[1] + 1:
-            print('Array de pesos incompatível com entrada!')
-            return None
+        # adicionando bies a matriz X
+        bies_column = pd.DataFrame().insert(0, 'bies', self.__bies)
+        X = pd.concat([bies_column, X])
 
-        pass
+        # aplicando Pseudo-Inversa de Moore-Penrose
+        self.__W = linalg.pinv(X) @ y
 
                 
     def activation_function(self, u):
@@ -50,7 +47,7 @@ class PerceptronMMQ:
 
     def predict(self, x, activation_function = True):
         
-        pass
+        u = (self.__W[1:] * x) + self.__bies
 
         # função de ativação
         return self.activation_function(u) if activation_function else u
