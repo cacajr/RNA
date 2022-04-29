@@ -1,7 +1,6 @@
 import numpy as np
 import math
 from scipy import linalg
-import pandas as pd
 
 
 class PerceptronMMQ:
